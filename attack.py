@@ -69,3 +69,13 @@ def _fired(env: Any) -> bool:
 def _emit(n: int) -> list[AttackCandidate]:
     n = max(1, min(int(n), HARD_N_CAP))
     return [AttackCandidate.from_messages((_msg(i),)) for i in range(n)]
+
+
+def _replay_stop(
+    replay_cost: float,
+    wall_now: float,
+    next_cost: float,
+    replay_cap: float,
+    wall_deadline: float,
+) -> bool:
+    return (replay_cost + next_cost >= replay_cap) or (wall_now + next_cost >= wall_deadline)

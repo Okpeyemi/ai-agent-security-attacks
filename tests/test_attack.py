@@ -69,3 +69,12 @@ def test_emit_clamps_and_shapes():
     assert len(attack._emit(0)) == 1              # clamped up to 1
     assert len(attack._emit(10_000)) == attack.HARD_N_CAP  # clamped to cap
     assert attack.FALLBACK_N < 600
+
+
+def test_replay_stop_triggers_on_either_bound():
+    # replay-cost bound: 90 + 20 >= 100 -> stop
+    assert attack._replay_stop(90.0, 10.0, 20.0, 100.0, 1000.0) is True
+    # wall bound: 995 + 20 >= 1000 -> stop
+    assert attack._replay_stop(10.0, 995.0, 20.0, 100.0, 1000.0) is True
+    # neither bound -> continue
+    assert attack._replay_stop(10.0, 10.0, 20.0, 100.0, 1000.0) is False
