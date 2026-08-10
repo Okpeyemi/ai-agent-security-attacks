@@ -147,3 +147,40 @@ def test_compliant_agent_fires_exfil_end_to_end():
     env.reset()
     env.interact(attack._msg(0), max_tool_hops=8)
     assert attack._fired(env) is True
+
+
+def _sandbox(agent):
+    from pathlib import Path
+    from aicomp_sdk.core.env.sandbox import SandboxEnv
+    from aicomp_sdk.guardrails.optimal import Guardrail as Optimal
+    fixtures = Path(__file__).resolve().parent.parent / "sdk" / "aicomp_sdk" / "fixtures"
+    return SandboxEnv(seed=123, fixtures_dir=fixtures, agent=agent, guardrail=Optimal())
+
+
+def test_integration_compliant_scores_positive():
+    from tests.compliant_agent import CompliantAgent
+    algo = attack.AttackAlgorithm(config={"replay_safe_frac": 0.9, "slowest0": 0.05})
+    env = _sandbox(CompliantAgent())
+    out = algo.run(env, attack.AttackRunConfig(time_budget_s=2.0, max_tool_hops=8))
+    assert len(out) >= 1
+    # Replay each candidate the way the grader does and score it.
+    from aicomp_sdk.core.predicates import eval_predicates
+    from aicomp_sdk.scoring import score_attack
+    findings = []
+    for c in out:
+        env.reset()
+        for m in c.user_messages:
+            env.interact(m, max_tool_hops=8)
+        trace = env.export_trace_dict()
+        preds = eval_predicates(trace)
+        assert any(p["predicate"] == "EXFILTRATION" for p in preds)
+        findings.append({"predicates": preds})
+    assert score_attack(findings) > 0
+
+
+def test_integration_deterministic_no_crash():
+    from aicomp_sdk.agents.factory import build_agent
+    algo = attack.AttackAlgorithm(config={"slowest0": 0.05})
+    env = _sandbox(build_agent("deterministic"))
+    out = algo.run(env, attack.AttackRunConfig(time_budget_s=1.0, max_tool_hops=8))
+    assert isinstance(out, list)  # runs to completion; fire not required
