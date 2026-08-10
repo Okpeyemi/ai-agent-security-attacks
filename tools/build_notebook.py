@@ -1,6 +1,13 @@
 """Generate the Kaggle submission notebook by inlining attack.py.
 
-Usage: python tools/build_notebook.py [-o submission.ipynb]
+Keeps attack.py as the single source of truth. A "variant" appends a small
+override block that reassigns module-level constants AFTER the class is defined
+(the gateway instantiates AttackAlgorithm(config={}), so on Kaggle the engine
+reads module constants, not config). This mirrors the public-notebook pattern.
+
+Usage:
+  python tools/build_notebook.py                       # baseline -> submission.ipynb
+  python tools/build_notebook.py --variant exp2-forge  # -> submission_exp2-forge.ipynb
 """
 from __future__ import annotations
 
@@ -9,6 +16,20 @@ import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+
+# Variant overrides: Python appended after the attack.py source. Empty = baseline.
+VARIANTS: dict[str, str] = {
+    "baseline": "",
+    "exp2-forge": (
+        "\n\n# --- variant override: exp2-forge (2026-08-10) ---\n"
+        "# gpt_oss chain-of-thought suppression via Harmony token forge, applied\n"
+        "# only to the latency-classified slow row. gemma (fast) keeps the plain\n"
+        "# verbose template. Enabled via module constants because the gateway\n"
+        "# instantiates AttackAlgorithm(config={}).\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = True\n"
+    ),
+}
 
 CELL1_SETUP = (
     "import sys, glob, os\n"
@@ -50,12 +71,10 @@ def _code_cell(source: str) -> dict:
             "outputs": [], "source": source.splitlines(keepends=True)}
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-o", "--output", default=str(REPO / "submission.ipynb"))
-    args = ap.parse_args()
-
-    attack_src = (REPO / "attack.py").read_text()
+def build(variant: str = "baseline", output: str | None = None) -> str:
+    if variant not in VARIANTS:
+        raise ValueError(f"Unknown variant {variant!r}; known: {sorted(VARIANTS)}")
+    attack_src = (REPO / "attack.py").read_text() + VARIANTS[variant]
     cell2 = "%%writefile /kaggle/working/attack.py\n" + attack_src
 
     nb = {
@@ -69,8 +88,21 @@ def main() -> int:
                      "language_info": {"name": "python"}},
         "nbformat": 4, "nbformat_minor": 5,
     }
-    Path(args.output).write_text(json.dumps(nb, indent=1))
-    print(f"wrote {args.output} ({len(attack_src)} chars of attack.py inlined)")
+    if output is None:
+        name = "submission.ipynb" if variant == "baseline" else f"submission_{variant}.ipynb"
+        output = str(REPO / name)
+    Path(output).write_text(json.dumps(nb, indent=1))
+    return output
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--variant", default="baseline", choices=sorted(VARIANTS))
+    ap.add_argument("-o", "--output", default=None)
+    args = ap.parse_args()
+    out = build(variant=args.variant, output=args.output)
+    attack_len = len((REPO / "attack.py").read_text()) + len(VARIANTS[args.variant])
+    print(f"wrote {out} (variant={args.variant}, {attack_len} chars of attack.py inlined)")
     return 0
 
 

@@ -8,4 +8,5 @@ __pycache__/
 .pytest_cache/
 # gstack
 .gstack/
-submission.ipynb
+submission*.ipynb
+kaggle_push/
