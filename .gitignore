@@ -1,0 +1,10 @@
+# Competition data & extracted SDK (large, reproducible from Kaggle)
+data/
+sdk/
+notebooks/
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+# gstack
+.gstack/
