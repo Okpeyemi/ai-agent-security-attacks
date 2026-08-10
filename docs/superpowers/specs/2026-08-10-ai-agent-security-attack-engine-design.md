@@ -42,6 +42,8 @@ ai-agent-security/
 │   ├── local_score.py        # local harness: evaluate_redteam vs deterministic agent + OptimalGuardrail
 │   └── build_notebook.py      # generates the Kaggle .ipynb by inlining attack.py
 ├── tests/
+│   ├── conftest.py           # puts sdk/ on sys.path for imports
+│   ├── compliant_agent.py    # minimal AgentProtocol mock that faithfully posts our payload
 │   └── test_attack.py        # unit + integration tests
 ├── experiments/
 │   ├── log.md                # dated experiment journal (Working Note raw material)
@@ -93,12 +95,14 @@ Pure message-builder functions, isolated from the engine.
 
 ## 6. Local harness, notebook & data flow
 
+**Local agent choice (important):** the SDK's `VulnerableDeterministicAgent` emits `http.post` but with its own fixed `data="demo"` — it ignores our payload, so our `SECRET_MARKER` template never fires EXFILTRATION against it (local score would be 0). It therefore validates the *pipeline* (no crash, sizing, fallback) but not the scoring path. To get a meaningful end-to-end scoring signal locally, we add a tiny **compliant mock agent** (`tests/compliant_agent.py`) implementing `AgentProtocol`: it reads the last user message, regex-extracts each `url=<host>` / `data=<value>` pair, and emits exactly those `http.post` tool calls (then a final `OK`). This models a fully-compliant target so the full fill→fire→replay→`eval_predicates`→`score_attack` path is exercised deterministically.
+
 ### `tools/local_score.py`
 - Adds `sdk/` to `sys.path`; imports SDK `evaluate_redteam` and our `AttackAlgorithm`.
-- Runs the attack against the **deterministic agent + `OptimalGuardrail`** via `SandboxEnv` (CPU, fast; no real models/GPU).
-- Prints real local `score_attack`, `N_eff`, unique cells, predicate breakdown; asserts void-safety invariants; appends a row to `experiments/results.csv`.
-- CLI: `python tools/local_score.py --budget-s 60 [--config knobs.json]`.
-- Caveat: local score validates pipeline/sizing/fire-detection, NOT real-model fire rates (deterministic ≠ gpt_oss/gemma). Real signal comes from Kaggle submissions.
+- Runs the attack via `SandboxEnv` + `OptimalGuardrail`, against a selectable agent (`--agent compliant|deterministic`, default `compliant`): the compliant mock gives a true `N_eff`/score number; the deterministic agent is a secondary realism/no-crash check.
+- Prints local `score_attack`, `N_eff`, unique cells, predicate breakdown; asserts void-safety invariants; appends a row to `experiments/results.csv`.
+- CLI: `python tools/local_score.py --budget-s 60 [--agent compliant] [--config knobs.json]`.
+- Caveat: local score validates pipeline/sizing/fire-detection and the *compliant-case* ceiling, NOT real-model fire rates (gpt_oss/gemma comply only partially). Real signal comes from Kaggle submissions.
 
 ### `tools/build_notebook.py` → 4-cell Kaggle notebook
 1. Setup: insert `kaggle_evaluation` parent into `sys.path`; detect `KAGGLE_IS_COMPETITION_RERUN`.
@@ -129,7 +133,8 @@ attack.py ──build_notebook──▶ submission.ipynb ──upload──▶ K
 - `_fired`: detects http.post+marker; rejects failures/other tools.
 - `_replay_stop` math: always stops before caps (synthetic-latency fake env).
 - `run(n_candidates=N)` → exactly N valid candidates; `run(env=None)` → `FALLBACK_N`.
-- Integration: run against `SandboxEnv`(deterministic+Optimal) → candidates replay, local score > 0.
+- Integration (compliant agent): run against `SandboxEnv`(compliant mock + Optimal) → candidates replay, EXFILTRATION fires, local `score_attack > 0`, `N_eff == len(candidates)`.
+- Integration (deterministic agent): run against `SandboxEnv`(deterministic + Optimal) → no crash, returns a valid candidate list within the budget (fire not required).
 
 ## 9. Working Note instrumentation
 
