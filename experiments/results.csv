@@ -1,0 +1,4 @@
+timestamp,label,agent,budget_s,n_returned,n_eff,unique_cells,score_local,gpt_oss_public,gpt_oss_private,gemma_public,gemma_private,notes
+2026-08-10T11:25:19,smoke,compliant,20.0,300,300,300,27.000,,,,,
+2026-08-10T11:26:07,det-smoke,deterministic,10.0,300,0,0,0.000,,,,,
+2026-08-10T11:27:25,fill-path,compliant,8.0,170,170,170,15.300,,,,,
