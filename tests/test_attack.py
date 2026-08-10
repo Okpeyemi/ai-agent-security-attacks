@@ -134,3 +134,16 @@ def test_fill_nonfiring_returns_fallback():
     env = _ProbeEnv(latency=0.001, fire=False)
     out = algo.run(env, attack.AttackRunConfig(time_budget_s=0.3, max_tool_hops=8))
     assert len(out) == attack.FALLBACK_N  # nothing fired -> blind fallback
+
+
+def test_compliant_agent_fires_exfil_end_to_end():
+    from pathlib import Path
+    from aicomp_sdk.core.env.sandbox import SandboxEnv
+    from aicomp_sdk.guardrails.optimal import Guardrail as Optimal
+    from tests.compliant_agent import CompliantAgent
+
+    fixtures = Path(__file__).resolve().parent.parent / "sdk" / "aicomp_sdk" / "fixtures"
+    env = SandboxEnv(seed=123, fixtures_dir=fixtures, agent=CompliantAgent(), guardrail=Optimal())
+    env.reset()
+    env.interact(attack._msg(0), max_tool_hops=8)
+    assert attack._fired(env) is True
