@@ -10,3 +10,5 @@ __pycache__/
 .gstack/
 submission*.ipynb
 kaggle_push/
+kaggle_push_exp2/
+kaggle_push_deputy/
