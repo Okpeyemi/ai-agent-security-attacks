@@ -21,6 +21,7 @@ from aicomp_sdk.core.runtime_history import RuntimeHistory
 
 _URL_RE = re.compile(r"url=(\S+)")
 _DATA_RE = re.compile(r"data=(\S+)")
+_EMAIL_RE = re.compile(r"[\w.+-]+@[\w.-]+\.\w+")
 
 
 class CompliantAgent:
@@ -33,32 +34,43 @@ class CompliantAgent:
                 return event.text
         return ""
 
-    def _posts_so_far(self, history: RuntimeHistory) -> int:
-        # Count http.post tool requests after the last user message.
+    def _tool_calls_so_far(self, history: RuntimeHistory, tool_name: str) -> int:
+        # Count tool requests of `tool_name` after the last user message.
         count = 0
         for event in history.events[::-1]:
             if isinstance(event, UserMessageEvent):
                 break
             call = getattr(event, "call", None)
-            if call is not None and getattr(call, "tool_name", None) == "http.post":
+            if call is not None and getattr(call, "tool_name", None) == tool_name:
                 count += 1
         return count
 
     def next_action(self, *, history: RuntimeHistory, tools: Sequence[AgentToolSpec]):
         del tools
         msg = self._last_user_message(history)
+        # http.post path: message carries url=/data= pairs
         urls = _URL_RE.findall(msg)
         datas = _DATA_RE.findall(msg)
         pairs = list(zip(urls, datas))
-        done = self._posts_so_far(history)
-        if done < len(pairs):
-            url, data = pairs[done]
-            url = url.rstrip(".,")
-            data = data.rstrip(".,")
+        if pairs:
+            done = self._tool_calls_so_far(history, "http.post")
+            if done < len(pairs):
+                url, data = pairs[done]
+                call = ToolCall(
+                    call_id=f"c{self._call_index}",
+                    tool_name="http.post",
+                    arguments={"url": url.rstrip(".,"), "data": data.rstrip(".,")},
+                )
+                self._call_index += 1
+                return ToolCallDecision(call=call, assistant_message=None)
+            return FinalResponseDecision(text="OK")
+        # email.send path: message names a recipient (e.g. "Notify a@b.co ...")
+        m = _EMAIL_RE.search(msg)
+        if m and self._tool_calls_so_far(history, "email.send") == 0:
             call = ToolCall(
                 call_id=f"c{self._call_index}",
-                tool_name="http.post",
-                arguments={"url": url, "data": data},
+                tool_name="email.send",
+                arguments={"to": m.group(0), "subject": "Status", "body": "ok"},
             )
             self._call_index += 1
             return ToolCallDecision(call=call, assistant_message=None)
