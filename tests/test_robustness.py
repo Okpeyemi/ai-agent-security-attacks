@@ -56,3 +56,25 @@ def test_blockall_email_denies_email_send():
     g = BlockAllEmailGuardrail()
     assert g.decide("email.send", EMAIL_ARGS, ctx()).action == "DENY"
     assert g.decide("http.post", EXFIL_ARGS, ctx()).action == "ALLOW"    # only emails blocked
+
+
+def test_evaluator_survival_table_matches_expected():
+    from tools import robustness_eval as R
+    result = R.evaluate()
+    surv = result["survival"]
+    # exfil (plaintext SECRET_MARKER) fires only where data is not inspected -> PostReadShare only
+    assert surv["exfil"]["PostReadShare"]["fired"] is True
+    assert surv["exfil"]["Naive"]["fired"] is False
+    assert surv["exfil"]["DataInspect"]["fired"] is False
+    assert surv["exfil"]["AggrTaint"]["fired"] is False
+    # deputy (benign email) survives every guardrail in the panel
+    assert all(cell["fired"] for cell in surv["deputy"].values())
+    # locked negative finding surfaced by the evaluator
+    assert result["encoded_fires"] is False
+
+
+def test_evaluator_fp_proof_collapses_defense_score():
+    from tools import robustness_eval as R
+    fp = R.fp_proof()
+    assert fp["fp_blocked"] >= 1                       # a benign email was blocked
+    assert fp["score_with_fp"] < fp["score_no_fp"]     # blocking CONFUSED_DEPUTY is self-defeating
