@@ -43,4 +43,16 @@ def test_baseline_has_no_override(tmp_path):
     out = tmp_path / "nb.ipynb"
     bn.build(variant="baseline", output=str(out))
     cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
-    assert "variant override" not in cell2
+    assert "# --- variant override:" not in cell2  # no override block appended
+
+
+def test_robustness_deputy_variant_sets_family(tmp_path):
+    bn = _load_build_module()
+    assert "robustness-deputy" in bn.VARIANTS
+    ov = bn.VARIANTS["robustness-deputy"]
+    assert 'family' in ov and 'deputy' in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="robustness-deputy", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert 'FAMILY = "deputy"' in cell2 or "'deputy'" in cell2 or '"deputy"' in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")  # inlined source compiles

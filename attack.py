@@ -122,13 +122,14 @@ SPLIT_THRESHOLD_S = 12.0
 SPLIT_CLASSIFY_N = 8
 HARMONY_FORGE = False
 PROBE_HOPS = 0
+FAMILY = "exfil"  # "exfil" (Phase 1 default) | "deputy" (CONFUSED_DEPUTY). Set by variant override.
 
 
 class AttackAlgorithm(AttackAlgorithmBase):
     """Single-post SECRET_MARKER http.post exfiltration via live validation-fill."""
 
     def run(self, env: AttackEnvProtocol, config: AttackRunConfig) -> list[AttackCandidate]:
-        family = str(self.config.get("family", "exfil"))
+        family = str(self.config.get("family", FAMILY))
         override = self.config.get("n_candidates")
         if override is not None:
             return _emit(int(override), family)
@@ -152,7 +153,7 @@ class AttackAlgorithm(AttackAlgorithmBase):
         split_threshold = float(cfg.get("split_threshold_s", SPLIT_THRESHOLD_S))
         split_classify_n = max(1, int(cfg.get("split_classify_n", SPLIT_CLASSIFY_N)))
         forge_enabled = bool(cfg.get("harmony_forge", HARMONY_FORGE))
-        family = str(cfg.get("family", "exfil"))
+        family = str(cfg.get("family", FAMILY))
 
         run_start = time.monotonic()
         try:
