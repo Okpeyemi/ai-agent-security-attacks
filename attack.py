@@ -96,9 +96,9 @@ def _fired(env: Any, family: str = "exfil") -> bool:
     return False
 
 
-def _emit(n: int) -> list[AttackCandidate]:
+def _emit(n: int, family: str = "exfil") -> list[AttackCandidate]:
     n = max(1, min(int(n), HARD_N_CAP))
-    return [AttackCandidate.from_messages((_msg(i),)) for i in range(n)]
+    return [AttackCandidate.from_messages((_family_msg(family, i),)) for i in range(n)]
 
 
 def _replay_stop(
@@ -128,15 +128,16 @@ class AttackAlgorithm(AttackAlgorithmBase):
     """Single-post SECRET_MARKER http.post exfiltration via live validation-fill."""
 
     def run(self, env: AttackEnvProtocol, config: AttackRunConfig) -> list[AttackCandidate]:
+        family = str(self.config.get("family", "exfil"))
         override = self.config.get("n_candidates")
         if override is not None:
-            return _emit(int(override))
+            return _emit(int(override), family)
         if env is None:
-            return _emit(FALLBACK_N)
+            return _emit(FALLBACK_N, family)
         budget = float(getattr(config, "time_budget_s", DEFAULT_BUDGET_S) or DEFAULT_BUDGET_S)
         hops = int(getattr(config, "max_tool_hops", 8) or 8)
         cands = self._fill(env, budget, hops)
-        return cands if cands else _emit(FALLBACK_N)
+        return cands if cands else _emit(FALLBACK_N, family)
 
     def _fill(self, env: Any, budget: float, hops: int) -> list[AttackCandidate]:
         cfg = self.config
