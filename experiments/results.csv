@@ -3,3 +3,4 @@ timestamp,label,agent,budget_s,n_returned,n_eff,unique_cells,score_local,gpt_oss
 2026-08-10T11:26:07,det-smoke,deterministic,10.0,300,0,0,0.000,,,,,
 2026-08-10T11:27:25,fill-path,compliant,8.0,170,170,170,15.300,,,,,
 2026-08-11T06:21:38,kaggle-v1-baseline,kaggle-real,9000,,,,,,,,,public_agg=52.865 ref=55404332 private-hidden conservative-defaults(forge=off,frac=0.90)
+2026-08-12T05:43:23,kaggle-exp2-forge,kaggle-real,9000,,,,,,,,,public_agg=75.420 ref=55424383 forge=on+split private-hidden (vs v1 52.865 => +22.555 +43%)
