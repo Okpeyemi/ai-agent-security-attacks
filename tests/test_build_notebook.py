@@ -46,6 +46,19 @@ def test_baseline_has_no_override(tmp_path):
     assert "# --- variant override:" not in cell2  # no override block appended
 
 
+def test_exp3_variant_stacks_forge_and_frac(tmp_path):
+    bn = _load_build_module()
+    assert "exp3-forge-frac95" in bn.VARIANTS
+    ov = bn.VARIANTS["exp3-forge-frac95"]
+    assert "HARMONY_FORGE = True" in ov and "SPLIT_BY_LATENCY = True" in ov
+    assert "REPLAY_SAFE_FRAC = 0.95" in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="exp3-forge-frac95", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert "REPLAY_SAFE_FRAC = 0.95" in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
 def test_robustness_deputy_variant_sets_family(tmp_path):
     bn = _load_build_module()
     assert "robustness-deputy" in bn.VARIANTS

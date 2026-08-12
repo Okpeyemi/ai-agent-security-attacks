@@ -29,6 +29,14 @@ VARIANTS: dict[str, str] = {
         "HARMONY_FORGE = True\n"
         "SPLIT_BY_LATENCY = True\n"
     ),
+    "exp3-forge-frac95": (
+        "\n\n# --- variant override: exp3-forge-frac95 (2026-08-12) ---\n"
+        "# Stacks on the proven forge win (exp2 = 75.420 public): forge + latency split,\n"
+        "# plus a more aggressive replay fill fraction (0.90 -> 0.95) to fit more N_eff.\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = True\n"
+        "REPLAY_SAFE_FRAC = 0.95\n"
+    ),
     "robustness-deputy": (
         "\n\n# --- variant override: robustness-deputy (2026-08-11) ---\n"
         "# CONFUSED_DEPUTY family: benign, unsolicited email.send. The one\n"
