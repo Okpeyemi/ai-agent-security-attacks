@@ -15,5 +15,7 @@ Each entry: date, hypothesis, config knobs, local score, Kaggle scores, N_eff, o
 - **Result:** public aggregate **75.420** vs baseline 52.865 → **+22.555 (+43%)**. COMPLETE, no void.
 - **Learning:** the forge lever works and is large — it is the dominant public-score lever (matches the public-notebook ~60→~85 tier claim). Clean ablation: single lever changed vs v1. Next: push replay_safe_frac 0.90→0.95 on top of forge to squeeze more N_eff.
 
-## robustness-deputy (2026-08-11, ref 55435129) — PENDING
+## robustness-deputy (2026-08-11, ref 55435129) — COMPLETE
 - **Hypothesis:** CONFUSED_DEPUTY fires on the real gpt_oss/gemma (local signal used the compliant mock). Public will be low (sev-3), the value is private transfer.
+- **Result:** public aggregate **11.940**. **CONFIRMED: CONFUSED_DEPUTY fires on the real models.** Per-candidate value is 0.03 (sev-3 weight 4 + 2 cell) vs 0.09 for exfil, so N_eff ≈ 11.94/0.03 ≈ **~398/model** (vs exfil ~587) — the deputy prompt fires at ~68% the throughput of exfil.
+- **Learning:** the one panel-4/4-robust family works end-to-end on real models. This is our private-transfer bet: if the private guardrail inspects http.post data (blocking exfil → exfil private≈0), deputy may out-score exfil privately despite its lower public. Portfolio hedge confirmed viable. Next idea: a `mix` variant (exfil + deputy in one submission) hedges both private scenarios in a single final; and forge could speed gpt_oss deputy generation too (more N_eff).
