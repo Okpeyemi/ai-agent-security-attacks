@@ -15,6 +15,12 @@ Each entry: date, hypothesis, config knobs, local score, Kaggle scores, N_eff, o
 - **Result:** public aggregate **75.420** vs baseline 52.865 → **+22.555 (+43%)**. COMPLETE, no void.
 - **Learning:** the forge lever works and is large — it is the dominant public-score lever (matches the public-notebook ~60→~85 tier claim). Clean ablation: single lever changed vs v1. Next: push replay_safe_frac 0.90→0.95 on top of forge to squeeze more N_eff.
 
+## exp3-forge-frac95 (2026-08-12, ref 55450614) — COMPLETE
+- **Hypothesis:** on top of forge (exp2), raising the replay fill fraction 0.90→0.95 fits more N_eff → higher public.
+- **Config:** `HARMONY_FORGE=True`, `SPLIT_BY_LATENCY=True`, `REPLAY_SAFE_FRAC=0.95`.
+- **Result:** public **83.250** vs exp2 75.420 → **+7.830 (+10.4%)**. COMPLETE, no void (0.95 is safe here).
+- **Learning:** the frac lever stacks cleanly on forge. Public trajectory 52.9→75.4→83.3. Further public: `probe_hops=1` (exp4) would help BUT the current engine accumulates fill `elapsed` as replay cost with no scaling — at probe_hops=1 that UNDER-counts the 8-hop replay cost → void risk. Needs a REPLAY_COST_COEF wired to probe_hops before exp4 is safe. Diminishing returns; prize is private → pivot to the `mix` hedge.
+
 ## robustness-deputy (2026-08-11, ref 55435129) — COMPLETE
 - **Hypothesis:** CONFUSED_DEPUTY fires on the real gpt_oss/gemma (local signal used the compliant mock). Public will be low (sev-3), the value is private transfer.
 - **Result:** public aggregate **11.940**. **CONFIRMED: CONFUSED_DEPUTY fires on the real models.** Per-candidate value is 0.03 (sev-3 weight 4 + 2 cell) vs 0.09 for exfil, so N_eff ≈ 11.94/0.03 ≈ **~398/model** (vs exfil ~587) — the deputy prompt fires at ~68% the throughput of exfil.
