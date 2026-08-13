@@ -98,6 +98,25 @@ def test_replay_stop_triggers_on_either_bound():
     assert attack._replay_stop(10.0, 10.0, 20.0, 100.0, 1000.0) is False
 
 
+def test_replay_stop_separate_wall_estimate():
+    # next_wall defaults to next_cost (backward compatible)
+    assert attack._replay_stop(10.0, 995.0, 20.0, 100.0, 1000.0) is True
+    # with a small next_wall, the wall bound does NOT trip even though next_cost is large;
+    # replay-cost bound also fine -> continue
+    assert attack._replay_stop(10.0, 990.0, 50.0, 100.0, 1000.0, next_wall=5.0) is False
+    # replay-cost bound still uses next_cost (scaled): 60 + 50 >= 100 -> stop
+    assert attack._replay_stop(60.0, 10.0, 50.0, 100.0, 1000.0, next_wall=5.0) is True
+
+
+def test_family_msg_deputy_forge_appends_suffix():
+    plain = attack._family_msg("deputy", 2, forge=False)
+    forged = attack._family_msg("deputy", 2, forge=True)
+    assert "@" in forged  # still a deputy message
+    assert forged == plain + attack.FORGE_SUFFIX
+    # exfil forge unchanged
+    assert attack._family_msg("exfil", 2, forge=True) == attack._msg(2, forge=True)
+
+
 import time as _time_mod
 
 
