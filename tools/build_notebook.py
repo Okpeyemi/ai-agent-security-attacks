@@ -45,6 +45,27 @@ VARIANTS: dict[str, str] = {
         "# AttackAlgorithm(config={}).\n"
         'FAMILY = "deputy"\n'
     ),
+    "exp4-probe1": (
+        "\n\n# --- variant override: exp4-probe1 (2026-08-13) ---\n"
+        "# Stacks on exp3 (public 83.250): probe the fill at 1 hop (~1.5-2x faster ->\n"
+        "# more N_eff). The exfil event is recorded at hop-0 so a candidate fires\n"
+        "# identically at 1 or 8 hops. REPLAY_COST_COEF=2.5 conservatively scales the\n"
+        "# 1-hop fill measurement up to the true 8-hop replay cost so replay-safe\n"
+        "# sizing cannot under-count and void.\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = True\n"
+        "REPLAY_SAFE_FRAC = 0.95\n"
+        "PROBE_HOPS = 1\n"
+        "REPLAY_COST_COEF = 2.5\n"
+    ),
+    "robustness-deputy-forge": (
+        "\n\n# --- variant override: robustness-deputy-forge (2026-08-13) ---\n"
+        "# CONFUSED_DEPUTY family + Harmony forge on the gpt_oss (slow) row to speed\n"
+        "# its generation -> more N_eff on our private-transfer bet. gemma unchanged.\n"
+        'FAMILY = "deputy"\n'
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = True\n"
+    ),
 }
 
 CELL1_SETUP = (

@@ -59,6 +59,33 @@ def test_exp3_variant_stacks_forge_and_frac(tmp_path):
     compile(cell2.split("\n", 1)[1], "attack.py", "exec")
 
 
+def test_exp4_probe1_variant(tmp_path):
+    bn = _load_build_module()
+    assert "exp4-probe1" in bn.VARIANTS
+    ov = bn.VARIANTS["exp4-probe1"]
+    for needle in ("HARMONY_FORGE = True", "SPLIT_BY_LATENCY = True",
+                   "REPLAY_SAFE_FRAC = 0.95", "PROBE_HOPS = 1", "REPLAY_COST_COEF = 2.5"):
+        assert needle in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="exp4-probe1", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert "PROBE_HOPS = 1" in cell2 and "REPLAY_COST_COEF = 2.5" in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
+def test_robustness_deputy_forge_variant(tmp_path):
+    bn = _load_build_module()
+    assert "robustness-deputy-forge" in bn.VARIANTS
+    ov = bn.VARIANTS["robustness-deputy-forge"]
+    assert 'FAMILY = "deputy"' in ov
+    assert "HARMONY_FORGE = True" in ov and "SPLIT_BY_LATENCY = True" in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="robustness-deputy-forge", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert 'FAMILY = "deputy"' in cell2 and "HARMONY_FORGE = True" in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
 def test_robustness_deputy_variant_sets_family(tmp_path):
     bn = _load_build_module()
     assert "robustness-deputy" in bn.VARIANTS
