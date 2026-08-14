@@ -21,6 +21,13 @@ Each entry: date, hypothesis, config knobs, local score, Kaggle scores, N_eff, o
 - **Result:** public **83.250** vs exp2 75.420 → **+7.830 (+10.4%)**. COMPLETE, no void (0.95 is safe here).
 - **Learning:** the frac lever stacks cleanly on forge. Public trajectory 52.9→75.4→83.3. Further public: `probe_hops=1` (exp4) would help BUT the current engine accumulates fill `elapsed` as replay cost with no scaling — at probe_hops=1 that UNDER-counts the 8-hop replay cost → void risk. Needs a REPLAY_COST_COEF wired to probe_hops before exp4 is safe. Diminishing returns; prize is private → pivot to the `mix` hedge.
 
+## exp4-probe1 (2026-08-13, ref 55481889) — COMPLETE, negative result
+- **Hypothesis:** probe the fill at 1 hop (exfil recorded at hop-0 → fires identically at 1/8 hops) → ~2× faster fill → more N_eff. `REPLAY_COST_COEF=2.5` to keep sizing void-safe.
+- **Config:** forge + split + `REPLAY_SAFE_FRAC=0.95` + `PROBE_HOPS=1` + `REPLAY_COST_COEF=2.5`.
+- **Result:** public **35.055** vs exp3 83.250 — a large REGRESSION (not a void; COMPLETE, non-zero).
+- **Diagnosis:** the "fires identically at 1 or 8 hops" claim does NOT hold for our model pair. The fill's fire-check runs at `probe_hops`; a candidate that needs >1 hop to fire is discarded even though it would fire at the 8-hop replay. The **gemma row has no forge** (plain template), so gemma often takes a reasoning turn before the tool → does not fire at 1 hop → that row craters. public = mean(gpt_oss, gemma) → halves. The conservative coef 2.5 added some drag but the fire-filter effect dominates.
+- **Learning:** `probe_hops=1` does NOT transfer to our (gpt_oss, gemma) pair — drop it. exp3 (probe at grader hops, 83.250) remains the best public final. The void-safe `REPLAY_COST_COEF`/two-bound `_replay_stop` engine work is sound and stays (byte-identical at coef=1.0); it is just not worth pairing with probe_hops=1 here. **No damage: exp3 is a separate, intact submission.**
+
 ## robustness-deputy (2026-08-11, ref 55435129) — COMPLETE
 - **Hypothesis:** CONFUSED_DEPUTY fires on the real gpt_oss/gemma (local signal used the compliant mock). Public will be low (sev-3), the value is private transfer.
 - **Result:** public aggregate **11.940**. **CONFIRMED: CONFUSED_DEPUTY fires on the real models.** Per-candidate value is 0.03 (sev-3 weight 4 + 2 cell) vs 0.09 for exfil, so N_eff ≈ 11.94/0.03 ≈ **~398/model** (vs exfil ~587) — the deputy prompt fires at ~68% the throughput of exfil.

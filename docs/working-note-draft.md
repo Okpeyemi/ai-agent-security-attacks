@@ -64,10 +64,13 @@ An evaluator runs each family through the panel and emits a survival table; this
 |---|---|---|---|---|
 | baseline (exfil) | conservative | **52.865** | hidden | validates pipeline + void-safe sizing on real models |
 | exp2-forge | latency-split Harmony CoT-suppression on slow model | **75.420** | hidden | +43% over baseline — isolates the fire-rate/speed lever; single-lever ablation |
-| exp3-forge-frac95 | forge + replay fill fraction 0.90→0.95 | **83.250** | hidden | +10% over exp2 — the sizing lever stacks on forge |
+| exp3-forge-frac95 | forge + replay fill fraction 0.90→0.95 | **83.250** | hidden | +10% over exp2 — the sizing lever stacks on forge; **best public** |
+| exp4-probe1 | + probe the fill at 1 hop | 35.055 | hidden | **negative result** — 1-hop probing under-selects firing candidates |
 | robustness-deputy | confused-deputy family | **11.940** | hidden | confused deputy **fires on the real models** — the private-transfer bet is live |
 
 The forge ablation is clean (one lever changed vs baseline): suppressing the slow model's chain-of-thought raises `N_eff` enough to move the public aggregate from 52.9 to 75.4. This is consistent with the yield model (§2): the lever does not change per-candidate value, only how many firing candidates fit the budget.
+
+A negative result worth recording: probing the live fill at a single tool hop (a common public trick, on the premise that the exfiltration event is emitted on the agent's first action) **regressed** the public aggregate from 83.3 to 35.1. The fill's fire-check runs at the probe hop count; a candidate that needs more than one hop to fire is discarded even though it would fire at the 8-hop replay. With chain-of-thought suppression applied only to the slow model, the other model routinely takes a reasoning turn before acting and thus fails the one-hop probe, collapsing its row. The lesson is that fill-time fire selection must run at (or above) the replay hop count unless one can show, per model, that firing is hop-0 — a property that did not hold for this model pair.
 
 The confused-deputy submission scores low publicly *by design* (severity 3 vs 5, so ~0.03 per candidate vs 0.09), but its public score being non-zero confirms the crucial fact: the benign unsolicited `email.send` **fires on the real gpt_oss/gemma agents**, at roughly two-thirds the throughput of exfiltration. Combined with its 4/4 panel survival and the false-positive economics, this makes it our concrete private-transfer bet — if the private guardrail inspects outbound payloads (blocking sentinel exfiltration), the confused-deputy family is expected to remain the standing scorer.
 
