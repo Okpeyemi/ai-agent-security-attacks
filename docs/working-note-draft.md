@@ -66,7 +66,8 @@ An evaluator runs each family through the panel and emits a survival table; this
 | exp2-forge | latency-split Harmony CoT-suppression on slow model | **75.420** | hidden | +43% over baseline — isolates the fire-rate/speed lever; single-lever ablation |
 | exp3-forge-frac95 | forge + replay fill fraction 0.90→0.95 | **83.250** | hidden | +10% over exp2 — the sizing lever stacks on forge; **best public** |
 | exp4-probe1 | + probe the fill at 1 hop | 35.055 | hidden | **negative result** — 1-hop probing under-selects firing candidates |
-| robustness-deputy | confused-deputy family | **11.940** | hidden | confused deputy **fires on the real models** — the private-transfer bet is live |
+| robustness-deputy | confused-deputy family | 11.940 | hidden | confused deputy **fires on the real models** — the private-transfer bet is live |
+| robustness-deputy-forge | confused-deputy + forge | **15.060** | hidden | +26% — the forge is a generic slow-model speedup (helps email.send too); **best private final** |
 
 The forge ablation is clean (one lever changed vs baseline): suppressing the slow model's chain-of-thought raises `N_eff` enough to move the public aggregate from 52.9 to 75.4. This is consistent with the yield model (§2): the lever does not change per-candidate value, only how many firing candidates fit the budget.
 

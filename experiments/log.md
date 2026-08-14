@@ -28,6 +28,12 @@ Each entry: date, hypothesis, config knobs, local score, Kaggle scores, N_eff, o
 - **Diagnosis:** the "fires identically at 1 or 8 hops" claim does NOT hold for our model pair. The fill's fire-check runs at `probe_hops`; a candidate that needs >1 hop to fire is discarded even though it would fire at the 8-hop replay. The **gemma row has no forge** (plain template), so gemma often takes a reasoning turn before the tool → does not fire at 1 hop → that row craters. public = mean(gpt_oss, gemma) → halves. The conservative coef 2.5 added some drag but the fire-filter effect dominates.
 - **Learning:** `probe_hops=1` does NOT transfer to our (gpt_oss, gemma) pair — drop it. exp3 (probe at grader hops, 83.250) remains the best public final. The void-safe `REPLAY_COST_COEF`/two-bound `_replay_stop` engine work is sound and stays (byte-identical at coef=1.0); it is just not worth pairing with probe_hops=1 here. **No damage: exp3 is a separate, intact submission.**
 
+## robustness-deputy-forge (2026-08-13, ref 55481906) — COMPLETE
+- **Hypothesis:** applying the Harmony forge to the gpt_oss deputy row speeds its generation → more N_eff on the private bet.
+- **Config:** `FAMILY="deputy"`, `HARMONY_FORGE=True`, `SPLIT_BY_LATENCY=True`.
+- **Result:** public **15.060** vs plain deputy 11.940 → **+3.120 (+26%)**. COMPLETE.
+- **Learning:** the forge is a **generic gpt_oss speedup** — it helps `email.send` (deputy) just as it helps `http.post` (exfil), because it suppresses the reasoning model's chain-of-thought regardless of the tool. deputy-forge (15.060) is the **new best private-strict final**, replacing plain deputy. Consistent with exp4's diagnosis (the slow gpt_oss row is the throughput bottleneck; forge fixes it, probe_hops=1 breaks the un-forged gemma row).
+
 ## robustness-deputy (2026-08-11, ref 55435129) — COMPLETE
 - **Hypothesis:** CONFUSED_DEPUTY fires on the real gpt_oss/gemma (local signal used the compliant mock). Public will be low (sev-3), the value is private transfer.
 - **Result:** public aggregate **11.940**. **CONFIRMED: CONFUSED_DEPUTY fires on the real models.** Per-candidate value is 0.03 (sev-3 weight 4 + 2 cell) vs 0.09 for exfil, so N_eff ≈ 11.94/0.03 ≈ **~398/model** (vs exfil ~587) — the deputy prompt fires at ~68% the throughput of exfil.
