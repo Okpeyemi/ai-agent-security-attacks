@@ -81,11 +81,17 @@ The confused-deputy submission scores low publicly *by design* (severity 3 vs 5,
 
 `attack.py` is a single self-contained module (imports only the SDK + stdlib). Families are `exfil` (default) and `deputy`. The strict panel (`tools/guardrails_strict.py`) and evaluator (`tools/robustness_eval.py`) are dev-only and regenerate the survival table (`experiments/robustness_table.md`). A compliant mock agent exercises the full fire→replay→score path deterministically; a local harness reproduces the `S = 0.09 · N_eff` scoring against the SDK scorer. Every finding above is locked by a unit test (including the negative encoding result).
 
-## 9. Limitations & future work
+## 9. Related work & grounding
+
+Our setup sits in the growing literature on tool-using-agent security. Benchmarks such as **InjecAgent** (arXiv 2403.02691), **AgentDojo**, and **Agent Security Bench** (arXiv 2410.02644) evaluate indirect prompt injection and tool misuse; automated attack search includes MCTS fuzzing (**AgentVigil**, arXiv 2505.05849) and quality-diversity methods (**Rainbow Teaming**; **RainbowPlus**, arXiv 2504.15047; **QD for diverse vulnerabilities**, arXiv 2606.00801). A useful distinction for this benchmark: that line of work optimizes *attack success rate* against models that tend to refuse, whereas here the scored prompts are benign-looking and fire readily — the binding constraint is *replay-budget yield* and *transfer to a held-out defense*, not refusal. This is why we use deterministic validation-fill rather than a search/RL loop, and why the quality-diversity idea, though aligned with the +2/cell diversity bonus, is not a lever here: cells are already unique per candidate by construction (distinct sink domain / recipient).
+
+Our central security insight is an instance of a documented failure mode: **"Capability Gates Are Not Authorization: Confused-Deputy Failures in LLM Agent Frameworks"** (arXiv 2606.28679) and the Cloud Security Alliance's confused-deputy note argue that authorization must live in a policy layer outside the LLM, with per-call value checks — exposing a tool is not authorizing its every invocation. Our false-positive-economics result is the quantitative other side of that coin: a guardrail that tries to supply the missing authorization by *blanket-blocking* a benign `email.send` cannot do so without an unacceptable false-positive cost (SDK defense score 1000 → 885.7 for a single blocked benign email). The confused deputy is robust in this benchmark precisely because the defense cannot be placed cheaply in the guardrail layer where the benchmark puts it.
+
+## 10. Limitations & future work
 
 The panel is a proxy, not the held-out guardrail; survival is evidence, not proof, and the real private components are unknown until reveal. The confused-deputy family's real-model fire rate is measured only via the leaderboard (the local signal uses a compliant mock). Future work: forged multi-post on the slow model's row (commit the reasoning channel to N enumerated sinks) to raise per-candidate exfiltration yield; a wider strict-guardrail panel; and, if the benchmark later exposes a real backing filesystem/shell, genuine multi-step read→encode→exfiltrate chains that the current sentinel/guardrail design forecloses.
 
-## 10. Conclusion — two hedged final submissions
+## 11. Conclusion — two hedged final submissions
 
 The prize is decided on a held-out stricter guardrail we cannot probe, so we finish with two submissions, one per plausible private regime:
 
