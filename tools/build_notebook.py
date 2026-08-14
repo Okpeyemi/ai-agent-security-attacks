@@ -45,6 +45,15 @@ VARIANTS: dict[str, str] = {
         "# AttackAlgorithm(config={}).\n"
         'FAMILY = "deputy"\n'
     ),
+    "exp5-frac97": (
+        "\n\n# --- variant override: exp5-frac97 (2026-08-14) ---\n"
+        "# Same proven single-post recipe as exp3 (forge + split), but fill 0.97 of\n"
+        "# the budget instead of 0.95 -> more N_eff. Disclosed public 79-86 notebooks\n"
+        "# use 0.97-0.98 safely with replay-safe (accumulated-cost) sizing. No probe_hops.\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = True\n"
+        "REPLAY_SAFE_FRAC = 0.97\n"
+    ),
     "exp4-probe1": (
         "\n\n# --- variant override: exp4-probe1 (2026-08-13) ---\n"
         "# Stacks on exp3 (public 83.250): probe the fill at 1 hop (~1.5-2x faster ->\n"
