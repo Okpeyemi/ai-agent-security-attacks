@@ -189,8 +189,12 @@ class AttackAlgorithm(AttackAlgorithmBase):
             if _replay_stop(replay_cost, time.monotonic(), next_cost, replay_cap, wall_deadline,
                             next_wall=next_wall):
                 break
-            classifying = split_on and classify_n < split_classify_n
-            forge = forge_enabled and split_on and not classifying and use_forge
+            if split_on:
+                classifying = classify_n < split_classify_n
+                forge = forge_enabled and not classifying and use_forge
+            else:
+                classifying = False
+                forge = forge_enabled  # unconditional forge when the latency split is off
             msg = _family_msg(family, idx, forge=forge)
             idx += 1
             t0 = time.monotonic()
