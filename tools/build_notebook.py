@@ -45,6 +45,17 @@ VARIANTS: dict[str, str] = {
         "# AttackAlgorithm(config={}).\n"
         'FAMILY = "deputy"\n'
     ),
+    "robustness-deputy-forge-uncond": (
+        "\n\n# --- variant override: robustness-deputy-forge-uncond (2026-08-15) ---\n"
+        "# Deputy analog of exp6. Probe finding: deputy-plain on gpt_oss is 3.8s (<12s split\n"
+        "# threshold), so the latency split may NOT forge gpt_oss deputy. Forge both rows\n"
+        "# unconditionally (gpt_oss ~3x faster deputy, gemma neutral) -> more N_eff on the\n"
+        "# private-strict bet. Strictly >= deputy-forge (15.06).\n"
+        'FAMILY = "deputy"\n'
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = False\n"
+        "REPLAY_SAFE_FRAC = 0.95\n"
+    ),
     "exp6-forge-uncond": (
         "\n\n# --- variant override: exp6-forge-uncond (2026-08-14) ---\n"
         "# Real-model probe finding: forge is ~6x faster on gpt_oss and NEUTRAL on gemma\n"

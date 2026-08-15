@@ -59,6 +59,21 @@ def test_exp3_variant_stacks_forge_and_frac(tmp_path):
     compile(cell2.split("\n", 1)[1], "attack.py", "exec")
 
 
+def test_deputy_forge_uncond_variant(tmp_path):
+    bn = _load_build_module()
+    assert "robustness-deputy-forge-uncond" in bn.VARIANTS
+    ov = bn.VARIANTS["robustness-deputy-forge-uncond"]
+    assert 'FAMILY = "deputy"' in ov
+    assert "HARMONY_FORGE = True" in ov
+    assert "SPLIT_BY_LATENCY = False" in ov
+    assert "REPLAY_SAFE_FRAC = 0.95" in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="robustness-deputy-forge-uncond", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert 'FAMILY = "deputy"' in cell2 and "SPLIT_BY_LATENCY = False" in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
 def test_exp6_forge_uncond_variant(tmp_path):
     bn = _load_build_module()
     assert "exp6-forge-uncond" in bn.VARIANTS
