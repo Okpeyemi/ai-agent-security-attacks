@@ -45,6 +45,16 @@ VARIANTS: dict[str, str] = {
         "# AttackAlgorithm(config={}).\n"
         'FAMILY = "deputy"\n'
     ),
+    "exp6-forge-uncond": (
+        "\n\n# --- variant override: exp6-forge-uncond (2026-08-14) ---\n"
+        "# Real-model probe finding: forge is ~6x faster on gpt_oss and NEUTRAL on gemma\n"
+        "# (both 100% fire). So the latency split is unnecessary and risks NOT forging\n"
+        "# gpt_oss if it measures <12s. Forge BOTH rows unconditionally (split off).\n"
+        "# frac stays 0.95 (confirmed best, exp3=83.25) to isolate the forge-routing change.\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = False\n"
+        "REPLAY_SAFE_FRAC = 0.95\n"
+    ),
     "exp5-frac97": (
         "\n\n# --- variant override: exp5-frac97 (2026-08-14) ---\n"
         "# Same proven single-post recipe as exp3 (forge + split), but fill 0.97 of\n"
