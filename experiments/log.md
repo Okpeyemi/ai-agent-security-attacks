@@ -59,3 +59,21 @@ defaults to the transformers backend and mis-reads a .gguf). fire-rate / latency
   submissions improved with forge implies the gateway is slower (RPC overhead pushes gpt_oss >12s). Fragile.
 - **Next:** probe gemma (A100/L4) — does forge (Harmony tokens) help or HURT gemma fire? Decides whether to
   forge both rows unconditionally (drop the latency split) or keep forge on gpt_oss only.
+
+## Real-model probe — gemma-4-26B on Colab A100 (2026-08-14, throwaway spike)
+Real unsloth/gemma-4-26B-A4B-it-GGUF UD-Q4_K_M via LlamaCppChatTemplateBackend + Gemma4Agent (default parser). N=8:
+
+| variant | fire | lat/cand (A100) |
+|---|---|---|
+| gemma exfil-plain  | 1.00 | 0.4s |
+| gemma exfil-forge  | 1.00 | 0.4s |
+| gemma deputy-plain | 1.00 | 0.7s |
+| gemma deputy-forge | 1.00 | 0.7s |
+
+- **forge does NOT hurt gemma** (fire stays 1.00 with the Harmony suffix — gemma treats it as inert text).
+- **forge does NOT help gemma either** (latency unchanged) — gemma isn't a long-CoT reasoning model, nothing to suppress.
+- **Conclusion:** the latency SPLIT is unnecessary AND risky. It exists only to avoid forging gemma, but forging gemma
+  costs nothing; meanwhile it risks misclassifying gpt_oss (4.7s<12s) as fast -> unforged -> loses the 6x.
+  **-> Apply forge UNCONDITIONALLY to both rows; drop SPLIT_BY_LATENCY.** Strictly >= exp3 (guarantees gpt_oss forge,
+  gemma unaffected, saves the ~8 plain classification probes). Follow-up (bounded): decouple forge from split in
+  _fill + add exp6-forge-uncond (forge uncond + frac 0.97).
