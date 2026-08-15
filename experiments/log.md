@@ -38,3 +38,24 @@ Each entry: date, hypothesis, config knobs, local score, Kaggle scores, N_eff, o
 - **Hypothesis:** CONFUSED_DEPUTY fires on the real gpt_oss/gemma (local signal used the compliant mock). Public will be low (sev-3), the value is private transfer.
 - **Result:** public aggregate **11.940**. **CONFIRMED: CONFUSED_DEPUTY fires on the real models.** Per-candidate value is 0.03 (sev-3 weight 4 + 2 cell) vs 0.09 for exfil, so N_eff ≈ 11.94/0.03 ≈ **~398/model** (vs exfil ~587) — the deputy prompt fires at ~68% the throughput of exfil.
 - **Learning:** the one panel-4/4-robust family works end-to-end on real models. This is our private-transfer bet: if the private guardrail inspects http.post data (blocking exfil → exfil private≈0), deputy may out-score exfil privately despite its lower public. Portfolio hedge confirmed viable. Next idea: a `mix` variant (exfil + deputy in one submission) hedges both private scenarios in a single final; and forge could speed gpt_oss deputy generation too (more N_eff).
+
+## Real-model probe — gpt_oss on Colab T4 (2026-08-14, throwaway spike)
+Loaded the real unsloth/gpt-oss-20b-GGUF Q4_K_M via LlamaCppChatTemplateBackend (NOT build_agent — that
+defaults to the transformers backend and mis-reads a .gguf). fire-rate / latency over N=8 per variant:
+
+| variant | fire | lat/cand |
+|---|---|---|
+| exfil-plain  | 1.00 | 4.7s |
+| exfil-forge  | 1.00 | 0.8s |
+| deputy-plain | 1.00 | 3.8s |
+| deputy-forge | 1.00 | 1.2s |
+
+- **fire = 100% on all variants** — gpt_oss never refuses our benign-looking prompts. Confirms the whole thesis.
+- **forge ≈ 6× faster on exfil (4.7->0.8s), ~3× on deputy (3.8->1.2s), no fire loss.** Forge is strictly better on gpt_oss.
+- The probe's absolute ~N_eff/~public extrapolation is UNRELIABLE (ignores the 2000-candidate cap, replay cost,
+  the gemma row, and gateway overhead; ground truth is exp3=83.25). Use it only for the RELATIVE forge factor.
+- **Risk surfaced:** our SPLIT_THRESHOLD_S=12 routes forge to the >12s row. gpt_oss WITHOUT forge is 4.7s on Colab
+  (<12s) — if the real gateway is similar, gpt_oss would be misclassified "fast" and NOT forged. That real
+  submissions improved with forge implies the gateway is slower (RPC overhead pushes gpt_oss >12s). Fragile.
+- **Next:** probe gemma (A100/L4) — does forge (Harmony tokens) help or HURT gemma fire? Decides whether to
+  forge both rows unconditionally (drop the latency split) or keep forge on gpt_oss only.
