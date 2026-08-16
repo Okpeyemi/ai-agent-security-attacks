@@ -45,6 +45,23 @@ VARIANTS: dict[str, str] = {
         "# AttackAlgorithm(config={}).\n"
         'FAMILY = "deputy"\n'
     ),
+    "exp9-frac98": (
+        "\n\n# --- variant override: exp9-frac98 (2026-08-16) ---\n"
+        "# Best public (exp5=86.9) was forge+split+frac0.97. The frac lever still had headroom\n"
+        "# (0.95->0.97 gained +3.6), so push the exfil final's fill fraction to 0.98.\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = True\n"
+        "REPLAY_SAFE_FRAC = 0.98\n"
+    ),
+    "deputy-uncond-frac97": (
+        "\n\n# --- variant override: deputy-uncond-frac97 (2026-08-16) ---\n"
+        "# Best deputy (exp7=18.27) was deputy+forge-uncond+frac0.95. Apply the same frac\n"
+        "# headroom to the deputy final: 0.95 -> 0.97.\n"
+        'FAMILY = "deputy"\n'
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = False\n"
+        "REPLAY_SAFE_FRAC = 0.97\n"
+    ),
     "robustness-deputy-forge-uncond": (
         "\n\n# --- variant override: robustness-deputy-forge-uncond (2026-08-15) ---\n"
         "# Deputy analog of exp6. Probe finding: deputy-plain on gpt_oss is 3.8s (<12s split\n"

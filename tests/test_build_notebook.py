@@ -59,6 +59,32 @@ def test_exp3_variant_stacks_forge_and_frac(tmp_path):
     compile(cell2.split("\n", 1)[1], "attack.py", "exec")
 
 
+def test_exp9_frac98_variant(tmp_path):
+    bn = _load_build_module()
+    assert "exp9-frac98" in bn.VARIANTS
+    ov = bn.VARIANTS["exp9-frac98"]
+    assert "HARMONY_FORGE = True" in ov and "SPLIT_BY_LATENCY = True" in ov
+    assert "REPLAY_SAFE_FRAC = 0.98" in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="exp9-frac98", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert "REPLAY_SAFE_FRAC = 0.98" in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
+def test_deputy_uncond_frac97_variant(tmp_path):
+    bn = _load_build_module()
+    assert "deputy-uncond-frac97" in bn.VARIANTS
+    ov = bn.VARIANTS["deputy-uncond-frac97"]
+    assert 'FAMILY = "deputy"' in ov and "HARMONY_FORGE = True" in ov
+    assert "SPLIT_BY_LATENCY = False" in ov and "REPLAY_SAFE_FRAC = 0.97" in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="deputy-uncond-frac97", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert "REPLAY_SAFE_FRAC = 0.97" in cell2 and 'FAMILY = "deputy"' in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
 def test_deputy_forge_uncond_variant(tmp_path):
     bn = _load_build_module()
     assert "robustness-deputy-forge-uncond" in bn.VARIANTS
