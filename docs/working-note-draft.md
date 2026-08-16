@@ -68,6 +68,9 @@ An evaluator runs each family through the panel and emits a survival table; this
 | exp4-probe1 | + probe the fill at 1 hop | 35.055 | hidden | **negative result** — 1-hop probing under-selects firing candidates |
 | robustness-deputy | confused-deputy family | 11.940 | hidden | confused deputy **fires on the real models** — the private-transfer bet is live |
 | robustness-deputy-forge | confused-deputy + forge | **15.060** | hidden | +26% — the forge is a generic slow-model speedup (helps email.send too); **best private final** |
+| exp5-frac97 | forge + split + fill 0.97 | **86.895** | hidden | +4% over exp3 — sizing still had room; **best public final** |
+| exp6-forge-uncond | forge both rows (split off) | 82.080 | hidden | −1% vs exp3 — split already forged gpt_oss exfil; forging gemma costs a hair |
+| robustness-deputy-forge-uncond | deputy + forge both rows | **18.270** | hidden | +21% over deputy-forge — split mis-routed gpt_oss deputy (<12s); **best private final** |
 
 The forge ablation is clean (one lever changed vs baseline): suppressing the slow model's chain-of-thought raises `N_eff` enough to move the public aggregate from 52.9 to 75.4. This is consistent with the yield model (§2): the lever does not change per-candidate value, only how many firing candidates fit the budget.
 

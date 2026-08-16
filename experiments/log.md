@@ -92,3 +92,17 @@ Tested 5 forged deputy templates (fire + latency) to see if a shorter prompt cut
 - **The explicit "Use the messaging tool" nudge is load-bearing**: removing it craters fire (T2 0%, T3 25%) — gpt_oss answers in text instead of calling email.send (and rambles → 13.8s).
 - **Shortening the descriptive text gives NO latency win**: T0/T1/T4 (78→55c) all sit at 1.2s — latency is dominated by generation (forge + tool call + args), not prompt length.
 - **Conclusion:** the current deputy template is already optimal; there is no shorter-template lever. **exp8 abandoned before submission** (harness saved a slot). Deputy is fully optimized = forge (exp7 makes it unconditional) + minimal template with the tool nudge. max_new_tokens (1024) is a gateway setting we can't change from attack.py.
+
+## exp5 / exp6 / exp7 results (2026-08-16) — two new bests + the split-routing asymmetry
+- **exp5** (forge + split + frac 0.97, ref 55512635) = **86.895** vs exp3 83.250 → **+3.645. NEW BEST PUBLIC.**
+  The sizing lever still had room (0.95→0.97). No void. Keep split ON for exfil.
+- **exp6** (forge UNCOND + frac 0.95, ref 55522598) = **82.080** vs exp3 83.250 → **−1.170.**
+  Unconditional forge is slightly WORSE for exfil: on the real gateway gpt_oss exfil is >12s, so the split
+  already forged it correctly; forging gemma too adds a hair of cost. → the latency split is fine for exfil.
+- **exp7** (deputy + forge UNCOND, ref 55523632) = **18.270** vs deputy-forge 15.060 → **+3.210 (+21%). NEW BEST DEPUTY.**
+  Opposite of exp6: gpt_oss *deputy* is faster than exfil and lands <12s on the gateway, so the split
+  mis-classified it as fast and did NOT forge it; unconditional forge fixes that → +21%.
+- **Asymmetry (data-driven):** the 12s split threshold correctly forges gpt_oss *exfil* (>12s) but mis-routes
+  gpt_oss *deputy* (<12s). So: exfil final keeps the split (exp5); deputy final uses unconditional forge (exp7).
+- **Finals locked:** PUBLIC = exp5 (86.895); PRIVATE-STRICT = exp7 (18.270). Both beat their predecessors.
+- Optional remaining squeezes (diminishing): frac 0.98 on the exfil final; frac 0.97 on the deputy-uncond final.
