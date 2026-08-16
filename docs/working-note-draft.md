@@ -71,6 +71,8 @@ An evaluator runs each family through the panel and emits a survival table; this
 | exp5-frac97 | forge + split + fill 0.97 | **86.895** | hidden | +4% over exp3 — sizing still had room; **best public final** |
 | exp6-forge-uncond | forge both rows (split off) | 82.080 | hidden | −1% vs exp3 — split already forged gpt_oss exfil; forging gemma costs a hair |
 | robustness-deputy-forge-uncond | deputy + forge both rows | **18.270** | hidden | +21% over deputy-forge — split mis-routed gpt_oss deputy (<12s); **best private final** |
+| exp9-frac98 | forge + split + fill 0.98 | **86.985** | hidden | +0.1 vs exp5 — frac lever saturated; **public final** |
+| deputy-uncond-frac97 | deputy + forge-uncond + fill 0.97 | **19.155** | hidden | +5% vs exp7; **private-strict final** |
 
 The forge ablation is clean (one lever changed vs baseline): suppressing the slow model's chain-of-thought raises `N_eff` enough to move the public aggregate from 52.9 to 75.4. This is consistent with the yield model (§2): the lever does not change per-candidate value, only how many firing candidates fit the budget.
 
@@ -98,7 +100,7 @@ The panel is a proxy, not the held-out guardrail; survival is evidence, not proo
 
 The prize is decided on a held-out stricter guardrail we cannot probe, so we finish with two submissions, one per plausible private regime:
 
-- **Public / lenient-private final — exfiltration, forged, 0.95 fill (public 83.3).** If the private guardrail does not inspect outbound payloads, sentinel exfiltration keeps scoring and this is the stronger final.
-- **Private-strict final — forged confused deputy (public 15.1).** If the private guardrail inspects payloads (blocking exfiltration), the benign `email.send` still fires and — by the false-positive economics — cannot be cheaply blocked, so this final is expected to stand.
+- **Public / lenient-private final — exfiltration, forged, split-routed, 0.98 fill (public 87.0).** If the private guardrail does not inspect outbound payloads, sentinel exfiltration keeps scoring and this is the stronger final.
+- **Private-strict final — forged (unconditional) confused deputy, 0.97 fill (public 19.2).** If the private guardrail inspects payloads (blocking exfiltration), the benign `email.send` still fires and — by the false-positive economics — cannot be cheaply blocked, so this final is expected to stand.
 
 Because the final ranking takes the best of the selected submissions, keeping the two pure finals dominates any single blended submission (a blend dilutes whichever family wins the actual regime). The transferable takeaways for the benchmark community: score yield is a replay-budget problem, not a candidate-count problem; suppressing the slow reasoning model's chain-of-thought is the dominant throughput lever, but any fill-time shortcut that changes *which* candidates are selected (e.g. single-hop probing) must be validated at the replay hop count; and the most defense-robust multi-step failure in this benchmark is not exfiltration but the confused deputy, precisely because a rational defender cannot block it without paying an unacceptable false-positive cost.

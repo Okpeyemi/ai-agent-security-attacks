@@ -106,3 +106,12 @@ Tested 5 forged deputy templates (fire + latency) to see if a shorter prompt cut
   gpt_oss *deputy* (<12s). So: exfil final keeps the split (exp5); deputy final uses unconditional forge (exp7).
 - **Finals locked:** PUBLIC = exp5 (86.895); PRIVATE-STRICT = exp7 (18.270). Both beat their predecessors.
 - Optional remaining squeezes (diminishing): frac 0.98 on the exfil final; frac 0.97 on the deputy-uncond final.
+
+## exp9 / deputy-uncond-frac97 (2026-08-16) — final squeeze; frac saturated
+- **exp9** (forge+split+frac0.98, ref 55544629) = **86.985** vs exp5 (0.97) 86.895 → **+0.09 (noise)**. The frac lever
+  is SATURATED: 0.95→0.97 gained +3.6, but 0.97→0.98 gains nothing (we hit the 2000-candidate cap / real replay wall).
+- **deputy-uncond-frac97** (ref 55544651) = **19.155** vs exp7 (0.95) 18.270 → **+0.885 (+4.8%)**. Deputy has fewer
+  candidates (sev-3) so it's further from the cap → still a little frac headroom. NEW BEST DEPUTY.
+- **ALL LEVERS EXHAUSTED.** Public 52.9→87.0, deputy 11.9→19.2. forge✅ frac✅(saturated) per-family-routing✅;
+  probe_hops❌ multipost❌ short-template❌ encoding❌.
+- **FINAL SUBMISSIONS (select at close 2026-09-01): PUBLIC = exp9 (86.985); PRIVATE-STRICT = deputy-uncond-frac97 (19.155).**

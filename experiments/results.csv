@@ -11,3 +11,5 @@ timestamp,label,agent,budget_s,n_returned,n_eff,unique_cells,score_local,gpt_oss
 2026-08-16T06:42:30,kaggle-exp5-frac97,kaggle-real,9000,,,,,,,,,public_agg=86.895 ref=55512635 forge+split+frac0.97 (vs exp3 83.250 => +3.645) NEW BEST PUBLIC
 2026-08-16T06:42:30,kaggle-exp6-forge-uncond,kaggle-real,9000,,,,,,,,,public_agg=82.080 ref=55522598 forge-uncond+frac0.95 (vs exp3 83.250 => -1.170) split was fine for exfil; forging gemma costs a hair
 2026-08-16T06:42:30,kaggle-exp7-deputy-forge-uncond,kaggle-real,9000,,,,,,,,,public_agg=18.270 ref=55523632 deputy+forge-uncond (vs deputy-forge 15.060 => +3.210 +21%) NEW BEST DEPUTY; split mis-routed deputy (gpt_oss deputy <12s on gateway)
+2026-08-16T23:23:49,kaggle-exp9-frac98,kaggle-real,9000,,,,,,,,,public_agg=86.985 ref=55544629 forge+split+frac0.98 (vs exp5 86.895 => +0.090 NOISE) frac SATURATED at 0.97-0.98
+2026-08-16T23:23:49,kaggle-deputy-uncond-frac97,kaggle-real,9000,,,,,,,,,public_agg=19.155 ref=55544651 deputy+forge-uncond+frac0.97 (vs exp7 18.270 => +0.885 +4.8%) NEW BEST DEPUTY
