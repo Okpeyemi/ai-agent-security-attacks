@@ -59,6 +59,20 @@ def test_exp3_variant_stacks_forge_and_frac(tmp_path):
     compile(cell2.split("\n", 1)[1], "attack.py", "exec")
 
 
+def test_exp10_probe1_uncond_variant(tmp_path):
+    bn = _load_build_module()
+    assert "exp10-probe1-uncond" in bn.VARIANTS
+    ov = bn.VARIANTS["exp10-probe1-uncond"]
+    assert "HARMONY_FORGE = True" in ov and "SPLIT_BY_LATENCY = False" in ov
+    assert "PROBE_HOPS = 1" in ov and "REPLAY_COST_COEF = 1.3" in ov
+    assert "REPLAY_SAFE_FRAC = 0.95" in ov
+    out = tmp_path / "nb.ipynb"
+    bn.build(variant="exp10-probe1-uncond", output=str(out))
+    cell2 = "".join(json.loads(out.read_text())["cells"][1]["source"])
+    assert "PROBE_HOPS = 1" in cell2 and "REPLAY_COST_COEF = 1.3" in cell2
+    compile(cell2.split("\n", 1)[1], "attack.py", "exec")
+
+
 def test_exp9_frac98_variant(tmp_path):
     bn = _load_build_module()
     assert "exp9-frac98" in bn.VARIANTS

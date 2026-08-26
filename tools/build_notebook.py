@@ -45,6 +45,19 @@ VARIANTS: dict[str, str] = {
         "# AttackAlgorithm(config={}).\n"
         'FAMILY = "deputy"\n'
     ),
+    "exp10-probe1-uncond": (
+        "\n\n# --- variant override: exp10-probe1-uncond (2026-08-16) ---\n"
+        "# Empirical test of probe_hops=1 done right. Probe confirmed forged exfil+deputy fire\n"
+        "# 100% at hops=1 on BOTH models (exp4 failed only because gemma was unforged). So forge\n"
+        "# both rows (split off) + probe the fill at 1 hop. REPLAY_COST_COEF=1.3 calibrated from\n"
+        "# the probe (replay/fill cost ratio ~1.24-1.25). frac 0.95 -> compare vs exp6 (82.08,\n"
+        "# forge-uncond, probe at grader hops) to ISOLATE probe_hops=1. Theory predicts ~neutral.\n"
+        "HARMONY_FORGE = True\n"
+        "SPLIT_BY_LATENCY = False\n"
+        "PROBE_HOPS = 1\n"
+        "REPLAY_COST_COEF = 1.3\n"
+        "REPLAY_SAFE_FRAC = 0.95\n"
+    ),
     "exp9-frac98": (
         "\n\n# --- variant override: exp9-frac98 (2026-08-16) ---\n"
         "# Best public (exp5=86.9) was forge+split+frac0.97. The frac lever still had headroom\n"
