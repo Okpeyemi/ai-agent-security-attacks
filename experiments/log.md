@@ -115,3 +115,21 @@ Tested 5 forged deputy templates (fire + latency) to see if a shorter prompt cut
 - **ALL LEVERS EXHAUSTED.** Public 52.9→87.0, deputy 11.9→19.2. forge✅ frac✅(saturated) per-family-routing✅;
   probe_hops❌ multipost❌ short-template❌ encoding❌.
 - **FINAL SUBMISSIONS (select at close 2026-09-01): PUBLIC = exp9 (86.985); PRIVATE-STRICT = deputy-uncond-frac97 (19.155).**
+
+## Real-model probe — hops=1 vs hops=8 with forge (2026-08-16, spike)
+| model/family (forged) | hops=8 | hops=1 |
+|---|---|---|
+| gpt_oss exfil  | 1.00 / 0.36s | 1.00 / 0.29s |
+| gpt_oss deputy | 1.00 / 0.48s | 1.00 / 0.33s |
+| gemma  exfil   | 1.00 / 0.45s | 1.00 / 0.36s |
+| gemma  deputy  | 1.00 / 0.73s | 1.00 / 0.49s |
+
+- **Forged candidates fire 100% at hops=1 on BOTH models** — confirms exp4 failed only because gemma was UNforged.
+  So probe_hops=1 is now SAFE (with forge on both rows).
+- BUT latency gain is only ~1.24-1.49× (forge already killed the CoT; the "OK" wrap-up is ~0.07s).
+- **Analysis: probe_hops=1 is likely NEUTRAL for score** — our replay-safe sizing is bounded by the REPLAY phase,
+  which is forced to hops=8 regardless of our probe_hops; the REPLAY_COST_COEF charges the real replay cost, so N
+  returned is unchanged. probe_hops=1 only speeds the fill (not the binding constraint).
+- Gap to top ~136: 87→N_eff~966/model vs 136→~1511; top gets ~1.5× cheaper replay/candidate (~5.5s vs our ~8.4s on
+  the gateway, RPC-overhead-dominated). Not reverse-engineerable from public info; multipost amortization is marginal
+  (~1.1×, wrap-up only 0.07s). **exp10 = empirical settle (forge-uncond + probe_hops=1 + coef1.3, frac0.95) vs exp6 82.08.**
