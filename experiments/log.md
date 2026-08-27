@@ -133,3 +133,18 @@ Tested 5 forged deputy templates (fire + latency) to see if a shorter prompt cut
 - Gap to top ~136: 87→N_eff~966/model vs 136→~1511; top gets ~1.5× cheaper replay/candidate (~5.5s vs our ~8.4s on
   the gateway, RPC-overhead-dominated). Not reverse-engineerable from public info; multipost amortization is marginal
   (~1.1×, wrap-up only 0.07s). **exp10 = empirical settle (forge-uncond + probe_hops=1 + coef1.3, frac0.95) vs exp6 82.08.**
+
+## exp10-probe1-uncond (2026-08-16) — CEILING CONFIRMED
+- **Config:** forge-UNCOND + PROBE_HOPS=1 + REPLAY_COST_COEF=1.3 + frac 0.95. **Result: 83.475.**
+- vs exp6 (82.080, uncond, no probe_hops): **+1.4** → probe_hops=1 gives a SMALL real gain (my "strictly neutral"
+  call was slightly pessimistic; there is a minor fill-side benefit).
+- vs exp9 (86.985, best public): **−3.5** → does NOT beat our best.
+- **Why no win:** probe_hops=1 REQUIRES forge on both rows (gemma must fire at 1 hop → uncond), but uncond-forge
+  has a ~−1.2 exfil penalty (forging gemma costs a hair, exp6 82.08 < exp3 83.25). The +1.4 and −1.2 roughly cancel;
+  even adding frac 0.98 (hypothetical exp11) would tie exp9 (~87), not beat it. No path above ~87 from these levers.
+- **CEILING CONFIRMED ~87 with the SECRET_MARKER single-post primitive on this gateway. All levers exhausted.**
+
+## FINAL DECISION (2026-08-16)
+- **PUBLIC FINAL = exp9** (forge+split+frac0.98) = **86.985** (kernel aas-attack-exp9).
+- **PRIVATE-STRICT FINAL = deputy-uncond-frac97** (deputy+forge-uncond+frac0.97) = **19.155** (kernel aas-attack-deputy-uncond-frac97).
+- Select these two in the UI at close (2026-09-01). Working Note ready (`docs/working-note-draft.md`).
