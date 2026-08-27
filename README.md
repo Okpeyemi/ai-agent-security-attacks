@@ -3,6 +3,22 @@
 Attack submission engine. Specs & plans in `docs/superpowers/`:
 Phase 1 (public workhorse) `specs/2026-08-10-ai-agent-security-attack-engine-design.md`;
 Phase 2 (transfer robustness) `specs/2026-08-11-phase2-transfer-robustness-design.md`.
+Full method write-up: `docs/working-note-draft.md`. Experiment log: `experiments/`.
+
+## Results & final submissions (campaign complete — ceiling confirmed)
+
+Public trajectory **52.9 → 87.0** (forge → fill-fraction, saturated at 0.97–0.98); deputy **11.9 → 19.2**.
+All levers exhausted or dominated (forge ✅, fill-fraction ✅; `probe_hops=1` ≈ wash, multi-post / encoding / short-template ❌).
+
+| Role | Variant / kernel | Public |
+|---|---|---|
+| **PUBLIC final** (lenient-private bet) | `exp9-frac98` — forge + latency-split + fill 0.98 (`aas-attack-exp9`) | **86.985** |
+| **PRIVATE-STRICT final** (strict bet) | `robustness-deputy-forge-uncond` + fill 0.97 (`aas-attack-deputy-uncond-frac97`) | **19.155** |
+
+**Decision:** select these two as the final submissions at close (2026-09-01). They hedge the two private-guardrail
+regimes — if the hidden guardrail does not inspect `http.post` data, the exfiltration final wins; if it does, the
+benign confused-deputy final still fires (survives the strict-guardrail panel 4/4; blocking it is self-defeating by
+the false-positive economics). Private scores are revealed at close. Working Note due 2026-09-08.
 
 ## Layout
 - `attack.py` — the submission engine (single self-contained file; source of truth). Two families: `exfil` (default, SECRET_MARKER public workhorse) and `deputy` (CONFUSED_DEPUTY, transfer-robust).
