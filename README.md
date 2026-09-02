@@ -27,7 +27,7 @@ stricter defense — not public score — is the evidence of a real, transferabl
 - `attack.py` — the submission engine (single self-contained file; source of truth). Two families: `exfil` (default, SECRET_MARKER public workhorse) and `deputy` (CONFUSED_DEPUTY, transfer-robust).
 - `tools/local_score.py` — local scoring harness (SandboxEnv + OptimalGuardrail).
 - `tools/build_notebook.py` — generates a notebook by inlining `attack.py`; `--variant` selects a variant override.
-- `tools/guardrails_strict.py` — dev-time panel of strict guardrails (proxies for the hidden private).
+- `tools/guardrails_strict.py` — dev-time panel of strict guardrails (proxies for the held-out private guardrail).
 - `tools/robustness_eval.py` — families × panel survival table + the CONFUSED_DEPUTY false-positive proof.
 - `tests/` — pytest suite (+ extended compliant mock agent).
 - `experiments/` — experiment log, results.csv, `robustness_table.md`.
@@ -50,7 +50,7 @@ Variants append a small module-constant override (the Kaggle gateway instantiate
 - `robustness-deputy` — `FAMILY="deputy"` (CONFUSED_DEPUTY; survives the strict panel 4/4 vs exfil 1/4).
 
 ## Submit
-Upload the chosen `submission*.ipynb`, set **GPU T4×2**, **Internet OFF**, Submit. Private is hidden until 2026-09-01; the panel/`robustness_table.md` is our transfer-robustness proxy, not the real private.
+Upload the chosen `submission*.ipynb`, set **GPU T4×2**, **Internet OFF**, Submit. The private leaderboard was revealed on 2026-09-01 (see Results above). During development the panel/`robustness_table.md` served as our transfer-robustness proxy for the then-hidden private guardrail — a proxy the reveal confirmed (exfiltration blocked, confused deputy intact).
 
 ## Engine knobs (via AttackAlgorithm config)
 Defaults are conservative (first submission cannot void). Tune one per submission:
