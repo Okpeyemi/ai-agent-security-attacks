@@ -4,6 +4,7 @@ Attack submission engine. Specs & plans in `docs/superpowers/`:
 Phase 1 (public workhorse) `specs/2026-08-10-ai-agent-security-attack-engine-design.md`;
 Phase 2 (transfer robustness) `specs/2026-08-11-phase2-transfer-robustness-design.md`.
 **Working Note (Kaggle Writeup): [`docs/working-note-submission.md`](docs/working-note-submission.md)** — *"Public Score Is Not Security: The Confused-Deputy Transfer Result."* This repository is its public companion. Method draft: `docs/working-note-draft.md`. Experiment log: `experiments/`.
+**Post-mortem vs the medalists: [`docs/post-mortem.md`](docs/post-mortem.md)** — where the 1.55x throughput gap came from (generated-token economy), and the playbook for next time.
 
 ## Results & final submissions (campaign complete — private leaderboard revealed)
 
