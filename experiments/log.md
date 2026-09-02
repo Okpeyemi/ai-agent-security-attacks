@@ -173,3 +173,5 @@ Team "Maqsoud TAWALIOU" (id 16700299), public rank 1267/4252 (86.985). Private s
 - **CRITICAL / to confirm in the UI:** the private LB counts the team's SELECTED finals. If deputy-uncond-frac97 was
   selected → our official private = 19.155. If only the high-public exfil kernels were selected (Kaggle's auto-pick
   when none are chosen) → 0. Confirm final selection / private rank in the UI.
+
+- **FINAL: private rank 142/4252 (top ~3.3%)** with deputy-uncond-frac97 (19.155) — confirmed selected. Public rank was 1267/4252 → the hedge produced a ~1125-place climb. Not top-5 (no LB prize); the live opportunity is the Working Note award (2×$2500, due 2026-09-08).

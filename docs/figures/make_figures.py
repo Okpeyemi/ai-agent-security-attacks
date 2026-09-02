@@ -80,6 +80,25 @@ def fig4_survival():
     fig.tight_layout(); fig.savefig(OUT / "fig4_survival.png"); plt.close(fig)
 
 
+
+
+def fig5_public_vs_private():
+    fams = ["exfiltration\n(best public)", "confused deputy\n(private-strict final)"]
+    pub = [86.985, 19.155]; prv = [0.0, 19.155]
+    x = np.arange(len(fams)); w = 0.38
+    fig, ax = plt.subplots(figsize=(6.4, 3.7))
+    ax.bar(x - w/2, pub, w, label="public", color=BLUE)
+    ax.bar(x + w/2, prv, w, label="private (held-out guardrail)", color=GREEN)
+    for xi, p_, r_ in zip(x, pub, prv):
+        ax.text(xi - w/2, p_ + 1, f"{p_:.1f}", ha="center", fontsize=9)
+        ax.text(xi + w/2, r_ + 1, f"{r_:.1f}", ha="center", fontsize=9)
+    ax.set_xticks(x); ax.set_xticklabels(fams)
+    ax.set_ylabel("leaderboard score")
+    ax.set_title("Private reveal: exfiltration -> 0, deputy transfers intact")
+    ax.legend(); ax.set_ylim(0, 100)
+    fig.tight_layout(); fig.savefig(OUT / "fig5_public_vs_private.png"); plt.close(fig)
+
+
 if __name__ == "__main__":
-    fig1_public_trajectory(); fig2_yield_fit(); fig3_forge_latency(); fig4_survival()
+    fig1_public_trajectory(); fig2_yield_fit(); fig3_forge_latency(); fig4_survival(); fig5_public_vs_private()
     print("wrote:", ", ".join(p.name for p in sorted(OUT.glob("fig*.png"))))
