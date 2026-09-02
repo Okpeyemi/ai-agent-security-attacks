@@ -148,3 +148,28 @@ Tested 5 forged deputy templates (fire + latency) to see if a shorter prompt cut
 - **PUBLIC FINAL = exp9** (forge+split+frac0.98) = **86.985** (kernel aas-attack-exp9).
 - **PRIVATE-STRICT FINAL = deputy-uncond-frac97** (deputy+forge-uncond+frac0.97) = **19.155** (kernel aas-attack-deputy-uncond-frac97).
 - Select these two in the UI at close (2026-09-01). Working Note ready (`docs/working-note-draft.md`).
+
+## PRIVATE REVEAL (2026-09-01) — THESIS VINDICATED
+Team "Maqsoud TAWALIOU" (id 16700299), public rank 1267/4252 (86.985). Private scores now revealed:
+
+| Family (our submissions) | Public | **Private** |
+|---|---|---|
+| ALL exfil variants (exp2/3/5/6/9/10, baseline) | 52.9–87.0 | **0.000** |
+| deputy (plain)            | 11.94 | 11.76 |
+| deputy-forge              | 15.06 | 15.06 |
+| deputy-uncond (exp7)      | 18.27 | 18.27 |
+| **deputy-uncond-frac97**  | 19.155 | **19.155** |
+
+- **Every exfiltration submission scored 0.000 private.** The held-out private guardrail inspects the outbound
+  payload → sentinel exfiltration blocked entirely — EXACTLY as predicted (§4/§6/§8 of the working note).
+- **Every confused-deputy submission transferred ~perfectly** (public ≈ private). The FP-economics argument held:
+  the private guardrail did not block benign email.send. Our private-strict bet is the standing scorer = **19.155**.
+- **Massive shake-up:** private LB top is ~46 (vs public ~137); the entire public exfil-SOTA field collapsed to ~0.
+  Our two-final hedge (exfil for lenient-private + deputy for strict-private) put us ON the private board while
+  pure-exfil competitors scored 0. **This is the core research payoff — the transfer framework predicted the reveal.**
+- Top private ~46 ≈ deputy with ~2.4× our N_eff (they filled the deputy family denser). Our deputy N_eff was
+  replay-budget-bound at ~640/model; the throughput gap (same ~1.5-2.4× seen on public) is the only thing between us
+  and the top on the private board.
+- **CRITICAL / to confirm in the UI:** the private LB counts the team's SELECTED finals. If deputy-uncond-frac97 was
+  selected → our official private = 19.155. If only the high-public exfil kernels were selected (Kaggle's auto-pick
+  when none are chosen) → 0. Confirm final selection / private rank in the UI.
